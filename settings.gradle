@@ -1,0 +1,3 @@
+include ':librespot-android-sink'
+include ':app'
+rootProject.name = "librespot-android"
