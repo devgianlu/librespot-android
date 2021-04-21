@@ -15,43 +15,40 @@ import xyz.gianlu.librespot.player.mixing.output.OutputAudioFormat;
 
 public class TremoloVorbisCodec extends Codec {
     private final byte[] buffer = new byte[2 * BUFFER_SIZE];
-
-    private OggDecodingInputStream inputStream;
+    private final OggDecodingInputStream in;
 
     public TremoloVorbisCodec(@NotNull GeneralAudioStream audioFile, @Nullable NormalizationData normalizationData, @NotNull PlayerConfiguration conf, int duration) throws IOException {
         super(audioFile, normalizationData, conf, duration);
-
         seekZero = audioIn.pos();
-
-        inputStream = new OggDecodingInputStream(new SeekableInputStream() {
+        in = new OggDecodingInputStream(new SeekableInputStream() {
             @Override
             public void seek(long positionBytes) throws IOException {
-                audioFile.stream().seek((int) (positionBytes + seekZero));
+                audioIn.seek((int) (positionBytes + seekZero));
             }
 
             @Override
             public long tell() {
-                return audioFile.stream().pos() - seekZero;
+                return audioIn.pos() - seekZero;
             }
 
             @Override
             public long length() {
-                return (audioFile.stream().available() + audioFile.stream().pos()) - seekZero;
+                return (audioIn.available() + audioIn.pos()) - seekZero;
             }
 
             @Override
             public int read(byte[] bytes) throws IOException {
-                return audioFile.stream().read(bytes);
+                return audioIn.read(bytes);
             }
 
             @Override
             public void close() {
-                audioFile.stream().close();
+                audioIn.close();
             }
 
             @Override
             public int read() throws IOException {
-                return audioFile.stream().read();
+                return audioIn.read();
             }
         });
 
@@ -62,21 +59,24 @@ public class TremoloVorbisCodec extends Codec {
     protected synchronized int readInternal(@NotNull OutputStream outputStream) throws IOException {
         if (closed) return -1;
 
-        int count = inputStream.read(buffer);
-        if (count == -1) return -1;
+        int count = in.read(buffer);
+        if (count == -1)
+            return -1;
+
         try {
             outputStream.write(buffer, 0, count);
             outputStream.flush();
         } catch (IllegalStateException e) {
             // TODO logging
         }
+
         return count;
     }
 
     @Override
     public int time() throws CannotGetTimeException {
         try {
-            return (int) inputStream.tellMs();
+            return (int) in.tellMs();
         } catch (Exception e) {
             throw new CannotGetTimeException();
         }
@@ -84,18 +84,18 @@ public class TremoloVorbisCodec extends Codec {
 
     @Override
     public void close() throws IOException {
-        if (inputStream != null) {
-            inputStream.close();
-        }
+        if (in != null)
+            in.close();
+
         super.close();
     }
 
     @Override
     public /*synchronized*/ void seek(int positionMs) {
         try {
-            inputStream.seekMs(positionMs);
+            in.seekMs(positionMs);
         } catch (IOException e) {
-            e.printStackTrace();
+            // TODO logging
         }
     }
 }
