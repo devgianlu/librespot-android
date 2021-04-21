@@ -84,12 +84,6 @@ JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecod
     return pointer;
 }
 
-static unsigned int samplesWritten = 0;
-
-static unsigned int pcm_bytes_to_frames(unsigned int bytes) {
-	return bytes / (2 * (16 >> 3));
-}
-
 JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_read(JNIEnv *env, jobject obj, jlong jHandle, jint jLen)
 {
     struct OggVorbis_File *vf;
@@ -123,8 +117,6 @@ JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodi
     params->obj = obj;
     return ov_pcm_seek(vf, jSamples);
 }
-
-
 
 JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_tellMs(JNIEnv *env, jobject obj, jlong jHandle)
 {
