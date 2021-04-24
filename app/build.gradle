@@ -42,4 +42,7 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
         exclude group: 'com.lmax', module: 'disruptor'
     }
+
+    implementation project(':librespot-android-sink')
+    implementation 'uk.uuid.slf4j:slf4j-android:1.7.30-0'
 }
