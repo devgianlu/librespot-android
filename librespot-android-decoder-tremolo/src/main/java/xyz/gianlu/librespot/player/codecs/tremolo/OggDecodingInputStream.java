@@ -1,5 +1,7 @@
 package xyz.gianlu.librespot.player.codecs.tremolo;
 
+import android.util.Log;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -9,8 +11,13 @@ import java.nio.ByteBuffer;
 /**
  * Created by M. Lehmann on 15.11.2016.
  */
+@SuppressWarnings("unused")
 public class OggDecodingInputStream extends InputStream {
     private static final int BUFFER_SIZE = 4096;
+    private static final int SEEK_SET = 0;
+    private static final int SEEK_CUR = 1;
+    private static final int SEEK_END = 2;
+    private final static String TAG = OggDecodingInputStream.class.getName();
 
     static {
         System.loadLibrary("tremolo");
@@ -46,6 +53,48 @@ public class OggDecodingInputStream extends InputStream {
     private native long totalSamples(long handle);
 
     private native void close(long handle);
+
+    private int writeOgg(int size) {
+        byte[] bytes = new byte[Math.min(size, BUFFER_SIZE)];
+        try {
+            int read = oggInputStream.read(bytes);
+            if (read > -1) {
+                jniBuffer.put(bytes);
+                jniBuffer.flip();
+                return read;
+            }
+
+            return 0;
+        } catch (Exception ex) {
+            Log.e(TAG, "Internal writeOgg failed.", ex);
+            return -1;
+        }
+    }
+
+    private int seekOgg(long offset, int whence) {
+        try {
+            if (whence == SEEK_SET)
+                oggInputStream.seek(offset);
+            else if (whence == SEEK_CUR)
+                oggInputStream.seek(oggInputStream.tell() + offset);
+            else if (whence == SEEK_END)
+                oggInputStream.seek(oggInputStream.length() + offset);
+
+            return 0;
+        } catch (Exception ex) {
+            Log.e(TAG, "Internal seekOgg failed.", ex);
+            return -1;
+        }
+    }
+
+    private int tellOgg() {
+        try {
+            return (int) oggInputStream.tell();
+        } catch (Exception ex) {
+            Log.e(TAG, "Internal tellOgg failed.", ex);
+            return -1;
+        }
+    }
 
     @Override
     public synchronized int read() {

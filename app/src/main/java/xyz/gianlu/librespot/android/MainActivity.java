@@ -51,12 +51,20 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Session creation failed: ", ex);
                 return;
             }
+
             PlayerConfiguration configuration = new PlayerConfiguration.Builder()
                     .setOutput(PlayerConfiguration.AudioOutput.CUSTOM)
                     .setOutputClass("xyz.gianlu.librespot.android.sink.AndroidSinkOutput")
                     .setOutputClassParams(new String[0])
                     .build();
+
             Player player = new Player(configuration, session);
+            try {
+                player.waitReady();
+            } catch (InterruptedException ex) {
+                return;
+            }
+
             player.load("spotify:album:5m4VYOPoIpkV0XgOiRKkWC", true, false);
 
         }).start();
