@@ -11,13 +11,20 @@ import com.spotify.connectstate.Connect;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import xyz.gianlu.librespot.audio.format.SuperAudioFormat;
 import xyz.gianlu.librespot.core.Session;
 import xyz.gianlu.librespot.mercury.MercuryClient;
 import xyz.gianlu.librespot.player.Player;
 import xyz.gianlu.librespot.player.PlayerConfiguration;
+import xyz.gianlu.librespot.player.codecs.Codecs;
+import xyz.gianlu.librespot.player.codecs.TremoloVorbisCodec;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Main";
+
+    static {
+        Codecs.replaceCodecs(SuperAudioFormat.VORBIS, TremoloVorbisCodec.class);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
