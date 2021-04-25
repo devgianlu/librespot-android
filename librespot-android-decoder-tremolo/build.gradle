@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
 }
 
 android {
@@ -7,11 +7,28 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "xyz.gianlu.librespot.android"
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        // TODO use modern way to build native library
+        sourceSets.main {
+            jniLibs.srcDir 'src/main/libs'
+            jni.srcDirs = [] //disable automatic ndk-build call
+        }
+
+        // call regular ndk-build(.cmd) script from app directory
+        task ndkBuild(type: Exec) {
+            commandLine 'ndk-build.cmd', '-C', file('src/main').absolutePath
+        }
+
+        tasks.withType(JavaCompile) {
+            compileTask -> compileTask.dependsOn ndkBuild
+        }
     }
 
     buildTypes {
@@ -25,17 +42,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    packagingOptions {
-        exclude 'log4j2.xml'
-        exclude 'META-INF/DEPENDENCIES'
-    }
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.3.0'
-
     implementation('xyz.gianlu.librespot:librespot-player:1.5.6-SNAPSHOT:thin') {
         exclude group: 'xyz.gianlu.librespot', module: 'librespot-sink'
         exclude group: 'com.lmax', module: 'disruptor'
