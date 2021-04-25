@@ -5,12 +5,17 @@ import android.media.AudioTrack;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
 
 import xyz.gianlu.librespot.player.mixing.output.OutputAudioFormat;
 import xyz.gianlu.librespot.player.mixing.output.SinkException;
 import xyz.gianlu.librespot.player.mixing.output.SinkOutput;
+
+import static android.media.AudioFormat.CHANNEL_OUT_MONO;
+import static android.media.AudioFormat.CHANNEL_OUT_STEREO;
+import static android.media.AudioFormat.ENCODING_PCM_16BIT;
 
 /**
  * @author devgianlu
@@ -21,8 +26,14 @@ public final class AndroidSinkOutput implements SinkOutput {
 
     @Override
     public boolean start(@NotNull OutputAudioFormat format) throws SinkException {
-        int pcmEncoding = format.getSampleSizeInBits() == 16 ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_FLOAT;
-        int channelConfig = format.getChannels() == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
+        if (format.getSampleSizeInBits() != 16) {
+            throw new SinkException("Unsupported SampleSize", null);
+        }
+        if (format.getChannels() < 1 || format.getChannels() > 2) {
+            throw new SinkException("Unsupported Number of Channels", null);
+        }
+        int pcmEncoding = ENCODING_PCM_16BIT;
+        int channelConfig = format.getChannels() == 1 ? CHANNEL_OUT_MONO : CHANNEL_OUT_STEREO;
         int sampleRate = (int) format.getSampleRate();
         int minBufferSize = AudioTrack.getMinBufferSize(
                 sampleRate,
@@ -91,5 +102,10 @@ public final class AndroidSinkOutput implements SinkOutput {
     @Override
     public void close() {
         track = null;
+    }
+
+    @VisibleForTesting
+    int getPlayState() {
+        return track.getPlayState();
     }
 }
