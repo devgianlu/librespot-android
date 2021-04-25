@@ -19,24 +19,51 @@ public final class AndroidSinkOutput implements SinkOutput {
     private AudioTrack track;
     private float lastVolume = -1;
 
-    public AndroidSinkOutput() {
-    }
-
     @Override
     public boolean start(@NotNull OutputAudioFormat format) throws SinkException {
-        AudioTrack.Builder builder = new AudioTrack.Builder();
-        builder.setAudioFormat(new AudioFormat.Builder()
-                .setSampleRate((int) format.getSampleRate())
-                .build());
+        int pcmEncoding = format.getSampleSizeInBits() == 16 ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_FLOAT;
+        int channelConfig = format.getChannels() == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
+        int sampleRate = (int) format.getSampleRate();
+        int minBufferSize = AudioTrack.getMinBufferSize(
+                sampleRate,
+                channelConfig,
+                pcmEncoding
+        );
 
-        track = builder.build();
+        AudioFormat audioFormat = new AudioFormat.Builder()
+                .setEncoding(pcmEncoding)
+                .setSampleRate(sampleRate)
+                .build();
+
+        try {
+            track = new AudioTrack.Builder()
+                    .setBufferSizeInBytes(minBufferSize)
+                    .setAudioFormat(audioFormat)
+                    .setTransferMode(AudioTrack.MODE_STREAM)
+                    .build();
+        } catch (UnsupportedOperationException e) {
+            throw new SinkException("AudioTrack creation failed in Sink: ", e.getCause());
+        }
+
         if (lastVolume != -1) track.setVolume(lastVolume);
         return true;
     }
 
     @Override
     public void write(byte[] buffer, int offset, int len) throws IOException {
-        track.write(buffer, offset, len, AudioTrack.WRITE_BLOCKING);
+        int outcome = track.write(buffer, offset, len, AudioTrack.WRITE_BLOCKING);
+        switch (outcome) {
+            case AudioTrack.ERROR:
+                throw new IOException("Generic Operation Failure while writing Track");
+            case AudioTrack.ERROR_BAD_VALUE:
+                throw new IOException("Invalid value used while writing Track");
+            case AudioTrack.ERROR_DEAD_OBJECT:
+                throw new IOException("Track Object has died in the meantime");
+            case AudioTrack.ERROR_INVALID_OPERATION:
+                throw new IOException("Failure due to improper use of Track Object methods");
+            default:
+                track.play();
+        }
     }
 
     @Override

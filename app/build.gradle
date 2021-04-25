@@ -42,5 +42,7 @@ dependencies {
         exclude group: 'org.apache.logging.log4j'
     }
 
-    implementation project(path: ':librespot-android-decoder-tremolo')
+    implementation project(':librespot-android-decoder-tremolo')
+    implementation project(':librespot-android-sink')
+    implementation 'uk.uuid.slf4j:slf4j-android:1.7.30-0'
 }
