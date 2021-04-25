@@ -63,39 +63,27 @@ public class TremoloVorbisCodec extends Codec {
         if (count == -1)
             return -1;
 
-        try {
-            outputStream.write(buffer, 0, count);
-            outputStream.flush();
-        } catch (IllegalStateException e) {
-            // TODO logging
-        }
-
+        outputStream.write(buffer, 0, count);
+        outputStream.flush();
         return count;
     }
 
     @Override
     public int time() throws CannotGetTimeException {
-        try {
-            return (int) in.tellMs();
-        } catch (Exception e) {
-            throw new CannotGetTimeException();
-        }
+        if (closed)
+            throw new CannotGetTimeException("Codec is closed");
+
+        return (int) in.tellMs();
     }
 
     @Override
     public void close() throws IOException {
-        if (in != null)
-            in.close();
-
+        if (in != null) in.close();
         super.close();
     }
 
     @Override
-    public /*synchronized*/ void seek(int positionMs) {
-        try {
-            in.seekMs(positionMs);
-        } catch (IOException e) {
-            // TODO logging
-        }
+    public void seek(int positionMs) {
+        if (!closed) in.seekMs(positionMs);
     }
 }
