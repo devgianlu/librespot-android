@@ -41,4 +41,6 @@ dependencies {
         exclude group: 'com.lmax', module: 'disruptor'
         exclude group: 'org.apache.logging.log4j'
     }
+
+    implementation project(path: ':librespot-android-decoder-tremolo')
 }

@@ -8,10 +8,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import xyz.gianlu.librespot.audio.format.SuperAudioFormat;
 import xyz.gianlu.librespot.core.Session;
 import xyz.gianlu.librespot.mercury.MercuryClient;
+import xyz.gianlu.librespot.player.codecs.Codecs;
+import xyz.gianlu.librespot.player.codecs.TremoloVorbisCodec;
 
 public class MainActivity extends AppCompatActivity {
+
+    static {
+        Codecs.replaceCodecs(SuperAudioFormat.VORBIS, TremoloVorbisCodec.class);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
