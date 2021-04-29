@@ -33,22 +33,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        File credentialsFile = new File(getDataDir(), "credentials.json");
+
         new Thread(() -> {
             Session session;
             try {
                 Session.Configuration conf = new Session.Configuration.Builder()
                         .setStoreCredentials(true)
-                        .setStoredCredentialsFile(new File(getDataDir(), "credentials.json"))
+                        .setStoredCredentialsFile(credentialsFile)
                         .setCacheEnabled(false)
                         .build();
 
-                session = new Session.Builder(conf)
+                Session.Builder builder = new Session.Builder(conf)
                         .setPreferredLocale(Locale.getDefault().getLanguage())
                         .setDeviceType(Connect.DeviceType.SMARTPHONE)
-                        .setDeviceName("librespot-android")
-                        .userPass("user", "password")
-                        .setDeviceId(null)
-                        .create();
+                        .setDeviceId(null).setDeviceName("librespot-android");
+
+                if (credentialsFile.exists() && credentialsFile.canRead())
+                    session = builder.stored(credentialsFile).create();
+                else
+                    session = builder.userPass("user", "password").create();
 
                 Log.i(TAG, "Logged in as: " + session.apWelcome().getCanonicalUsername());
             } catch (IOException |
