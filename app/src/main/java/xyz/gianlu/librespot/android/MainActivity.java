@@ -8,9 +8,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.spotify.connectstate.Connect;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 
+import xyz.gianlu.librespot.android.sink.AndroidSinkOutput;
 import xyz.gianlu.librespot.audio.format.SuperAudioFormat;
 import xyz.gianlu.librespot.core.Session;
 import xyz.gianlu.librespot.mercury.MercuryClient;
@@ -34,14 +37,18 @@ public class MainActivity extends AppCompatActivity {
             Session session;
             try {
                 Session.Configuration conf = new Session.Configuration.Builder()
-                        .setStoreCredentials(false)
-                        .setCacheEnabled(false).build();
+                        .setStoreCredentials(true)
+                        .setStoredCredentialsFile(new File(getDataDir(), "credentials.json"))
+                        .setCacheEnabled(false)
+                        .build();
+
                 session = new Session.Builder(conf)
-                        .setPreferredLocale("en")
+                        .setPreferredLocale(Locale.getDefault().getLanguage())
                         .setDeviceType(Connect.DeviceType.SMARTPHONE)
-                        .setDeviceName("librespot-java")
+                        .setDeviceName("librespot-android")
                         .userPass("user", "password")
-                        .setDeviceId(null).create();
+                        .setDeviceId(null)
+                        .create();
 
                 Log.i(TAG, "Logged in as: " + session.apWelcome().getCanonicalUsername());
             } catch (IOException |
@@ -54,8 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
             PlayerConfiguration configuration = new PlayerConfiguration.Builder()
                     .setOutput(PlayerConfiguration.AudioOutput.CUSTOM)
-                    .setOutputClass("xyz.gianlu.librespot.android.sink.AndroidSinkOutput")
-                    .setOutputClassParams(new String[0])
+                    .setOutputClass(AndroidSinkOutput.class.getName())
                     .build();
 
             Player player = new Player(configuration, session);
@@ -65,8 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            player.load("spotify:album:5m4VYOPoIpkV0XgOiRKkWC", true, false);
-
+            player.load("spotify:track:1ozGeip1vdU0wY1dIw1scz", true, false);
         }).start();
     }
 }
