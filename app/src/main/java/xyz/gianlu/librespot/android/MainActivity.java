@@ -68,6 +68,22 @@ public final class MainActivity extends AppCompatActivity {
             executorService.execute(new PlayRunnable(playUri, () -> Toast.makeText(MainActivity.this, R.string.playbackStarted, Toast.LENGTH_SHORT).show()));
         });
 
+        binding.resume.setOnClickListener((v) ->
+                executorService.execute(new ResumeRunnable(() ->
+                        Toast.makeText(this, R.string.resumed, Toast.LENGTH_SHORT).show())));
+
+        binding.pause.setOnClickListener((v) ->
+                executorService.execute(new PauseRunnable(() ->
+                        Toast.makeText(this, R.string.paused, Toast.LENGTH_SHORT).show())));
+
+        binding.prev.setOnClickListener((v) ->
+                executorService.execute(new PrevRunnable(() ->
+                        Toast.makeText(this, R.string.skippedPrev, Toast.LENGTH_SHORT).show())));
+
+        binding.next.setOnClickListener((v) ->
+                executorService.execute(new NextRunnable(() ->
+                        Toast.makeText(this, R.string.skippedNext, Toast.LENGTH_SHORT).show())));
+
         executorService.submit(new SetupRunnable(credentialsFile, new SetupCallback() {
             @Override
             public void playerReady(@NotNull String username) {
@@ -99,8 +115,8 @@ public final class MainActivity extends AppCompatActivity {
         void failedGettingReady(@NotNull Exception ex);
     }
 
-    private interface PlayCallback {
-        void startedPlayback();
+    private interface SimpleCallback {
+        void done();
     }
 
     private static class SetupRunnable implements Runnable {
@@ -177,10 +193,10 @@ public final class MainActivity extends AppCompatActivity {
 
     private static class PlayRunnable implements Runnable {
         private final String playUri;
-        private final PlayCallback callback;
+        private final SimpleCallback callback;
         private final Handler handler = new Handler(Looper.getMainLooper());
 
-        PlayRunnable(@NotNull String playUri, @NotNull PlayCallback callback) {
+        PlayRunnable(@NotNull String playUri, @NotNull SimpleCallback callback) {
             this.playUri = playUri;
             this.callback = callback;
         }
@@ -191,7 +207,79 @@ public final class MainActivity extends AppCompatActivity {
             if (player == null) return;
 
             player.load(playUri, true, false);
-            handler.post(callback::startedPlayback);
+            handler.post(callback::done);
+        }
+    }
+
+    private static class ResumeRunnable implements Runnable {
+        private final SimpleCallback callback;
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        ResumeRunnable(@NotNull SimpleCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            Player player = LibrespotHolder.getPlayer();
+            if (player == null) return;
+
+            player.play();
+            handler.post(callback::done);
+        }
+    }
+
+    private static class PauseRunnable implements Runnable {
+        private final SimpleCallback callback;
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        PauseRunnable(@NotNull SimpleCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            Player player = LibrespotHolder.getPlayer();
+            if (player == null) return;
+
+            player.pause();
+            handler.post(callback::done);
+        }
+    }
+
+    private static class PrevRunnable implements Runnable {
+        private final SimpleCallback callback;
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        PrevRunnable(@NotNull SimpleCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            Player player = LibrespotHolder.getPlayer();
+            if (player == null) return;
+
+            player.previous();
+            handler.post(callback::done);
+        }
+    }
+
+    private static class NextRunnable implements Runnable {
+        private final SimpleCallback callback;
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        NextRunnable(@NotNull SimpleCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            Player player = LibrespotHolder.getPlayer();
+            if (player == null) return;
+
+            player.next();
+            handler.post(callback::done);
         }
     }
 }

@@ -34,15 +34,40 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="spotify:track:4cOdK2wGLETKBW3PvgPWqT"
                 android:inputType="textVisiblePassword"
-                android:lines="1" />
+                android:lines="1"
+                android:text="spotify:track:4cOdK2wGLETKBW3PvgPWqT" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/play"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="@string/play" />
+
+        <Button
+            android:id="@+id/resume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/resume" />
+
+        <Button
+            android:id="@+id/pause"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pause" />
+
+        <Button
+            android:id="@+id/next"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/next" />
+
+        <Button
+            android:id="@+id/prev"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/previous" />
     </LinearLayout>
 </LinearLayout>

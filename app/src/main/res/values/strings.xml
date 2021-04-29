@@ -12,4 +12,12 @@
     <string name="somethingWentWrong">Something went wrong!</string>
     <string name="playUri">Spotify URI to play</string>
     <string name="play">Play</string>
+    <string name="resume">Resume</string>
+    <string name="pause">Pause</string>
+    <string name="resumed">Resumed!</string>
+    <string name="paused">Paused!</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="skippedNext">Skipped to next!</string>
+    <string name="skippedPrev">Skipped to previous!</string>
 </resources>
