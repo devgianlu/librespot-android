@@ -5,10 +5,44 @@
     android:orientation="vertical"
     android:padding="24dp">
 
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/logout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/logout" />
 
+    <LinearLayout
+        android:id="@+id/playControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/playUri"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:hint="@string/playUri">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="spotify:track:4cOdK2wGLETKBW3PvgPWqT"
+                android:inputType="textVisiblePassword"
+                android:lines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/play"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/play" />
+    </LinearLayout>
 </LinearLayout>

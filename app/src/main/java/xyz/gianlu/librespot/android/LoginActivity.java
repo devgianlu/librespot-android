@@ -5,13 +5,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.textfield.TextInputLayout;
 import com.spotify.connectstate.Connect;
 
 import org.jetbrains.annotations.NotNull;
@@ -28,20 +26,11 @@ import xyz.gianlu.librespot.mercury.MercuryClient;
 public final class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    @NotNull
-    private static String getText(@NotNull TextInputLayout layout) {
-        EditText editText = layout.getEditText();
-        if (editText == null) throw new IllegalStateException();
-        return editText.getText().toString();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityLoginBinding binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        File credentialsFile = new File(getDataDir(), "credentials.json");
 
         LoginCallback callback = new LoginCallback() {
             @Override
@@ -58,11 +47,12 @@ public final class LoginActivity extends AppCompatActivity {
         };
 
         binding.login.setOnClickListener(v -> {
-            String username = getText(binding.username);
-            String password = getText(binding.password);
+            String username = Utils.getText(binding.username);
+            String password = Utils.getText(binding.password);
             if (username.isEmpty() || password.isEmpty())
                 return;
 
+            File credentialsFile = Utils.getCredentialsFile(this);
             new LoginThread(username, password, credentialsFile, callback).start();
         });
     }
@@ -104,7 +94,7 @@ public final class LoginActivity extends AppCompatActivity {
                         .setDeviceId(null).setDeviceName("librespot-android");
 
                 Session session = builder.userPass(username, password).create();
-                Log.i(TAG, "Logged in as: " + session.apWelcome().getCanonicalUsername());
+                Log.i(TAG, "Logged in as: " + session.username());
 
                 LibrespotHolder.set(session);
 

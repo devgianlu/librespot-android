@@ -8,4 +8,8 @@
     <string name="playbackStarted">Playback started!</string>
     <string name="failedStartingPlayback">Failed starting playback!</string>
     <string name="logout">Logout</string>
+    <string name="playerReady">Player is ready!</string>
+    <string name="somethingWentWrong">Something went wrong!</string>
+    <string name="playUri">Spotify URI to play</string>
+    <string name="play">Play</string>
 </resources>
