@@ -46,6 +46,8 @@ public final class AndroidSinkOutput implements SinkOutput {
         }
 
         if (lastVolume != -1) track.setVolume(lastVolume);
+
+        track.play();
         return true;
     }
 
@@ -61,8 +63,6 @@ public final class AndroidSinkOutput implements SinkOutput {
                 throw new IOException("Track Object has died in the meantime");
             case AudioTrack.ERROR_INVALID_OPERATION:
                 throw new IOException("Failure due to improper use of Track Object methods");
-            default:
-                track.play();
         }
     }
 
@@ -89,7 +89,7 @@ public final class AndroidSinkOutput implements SinkOutput {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         track = null;
     }
 }
