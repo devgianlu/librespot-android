@@ -27,7 +27,7 @@ android {
         }
 
         tasks.withType(JavaCompile) {
-            compileTask -> compileTask.dependsOn ndkBuild
+            // compileTask -> compileTask.dependsOn ndkBuild
         }
     }
 
@@ -45,9 +45,5 @@ android {
 }
 
 dependencies {
-    implementation('xyz.gianlu.librespot:librespot-player:1.5.6-SNAPSHOT:thin') {
-        exclude group: 'xyz.gianlu.librespot', module: 'librespot-sink'
-        exclude group: 'com.lmax', module: 'disruptor'
-        exclude group: 'org.apache.logging.log4j'
-    }
+    implementation 'xyz.gianlu.librespot:librespot-decoder-api:1.5.6-SNAPSHOT'
 }

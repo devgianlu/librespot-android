@@ -20,6 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keepclassmembers class xyz.gianlu.librespot.player.codecs.tremolo.OggDecodingInputStream {
+-keepclassmembers class xyz.gianlu.librespot.player.decoders.tremolo.OggDecodingInputStream {
    *;
 }

@@ -1,4 +1,4 @@
-package xyz.gianlu.librespot.player.codecs.tremolo;
+package xyz.gianlu.librespot.player.decoders.tremolo;
 
 import android.util.Log;
 

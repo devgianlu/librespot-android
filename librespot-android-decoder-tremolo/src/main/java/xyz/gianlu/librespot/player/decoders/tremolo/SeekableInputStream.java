@@ -1,4 +1,4 @@
-package xyz.gianlu.librespot.player.codecs.tremolo;
+package xyz.gianlu.librespot.player.decoders.tremolo;
 
 import java.io.IOException;
 import java.io.InputStream;

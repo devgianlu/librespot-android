@@ -1,25 +1,22 @@
-package xyz.gianlu.librespot.player.codecs;
+package xyz.gianlu.librespot.player.decoders;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import xyz.gianlu.librespot.audio.GeneralAudioStream;
-import xyz.gianlu.librespot.audio.NormalizationData;
-import xyz.gianlu.librespot.player.PlayerConfiguration;
-import xyz.gianlu.librespot.player.codecs.tremolo.OggDecodingInputStream;
-import xyz.gianlu.librespot.player.codecs.tremolo.SeekableInputStream;
+import xyz.gianlu.librespot.player.decoders.tremolo.OggDecodingInputStream;
+import xyz.gianlu.librespot.player.decoders.tremolo.SeekableInputStream;
 import xyz.gianlu.librespot.player.mixing.output.OutputAudioFormat;
 
-public class TremoloVorbisCodec extends Codec {
+
+public final class TremoloVorbisCodec extends Decoder {
     private final byte[] buffer = new byte[2 * BUFFER_SIZE];
     private final OggDecodingInputStream in;
 
-    public TremoloVorbisCodec(@NotNull GeneralAudioStream audioFile, @Nullable NormalizationData normalizationData, @NotNull PlayerConfiguration conf, int duration) throws IOException {
-        super(audioFile, normalizationData, conf, duration);
-        seekZero = audioIn.pos();
+    public TremoloVorbisCodec(@NotNull xyz.gianlu.librespot.player.decoders.SeekableInputStream audioFile, float normalizationFactor, int duration) throws IOException {
+        super(audioFile, normalizationFactor, duration);
+        seekZero = audioIn.position();
         in = new OggDecodingInputStream(new SeekableInputStream() {
             @Override
             public void seek(long positionBytes) throws IOException {
@@ -28,12 +25,12 @@ public class TremoloVorbisCodec extends Codec {
 
             @Override
             public long tell() {
-                return audioIn.pos() - seekZero;
+                return audioIn.position() - seekZero;
             }
 
             @Override
-            public long length() {
-                return (audioIn.available() + audioIn.pos()) - seekZero;
+            public long length() throws IOException {
+                return (audioIn.available() + audioIn.position()) - seekZero;
             }
 
             @Override
