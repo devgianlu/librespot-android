@@ -46,7 +46,7 @@ static long oggTell(void *datasource)
     return position;
 }
 
-JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_initDecoder(JNIEnv *env, jobject obj, jobject jJjniBuffer)
+JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_initDecoder(JNIEnv *env, jobject obj, jobject jJjniBuffer)
 {
     void *jniBuffer = (*env)->GetDirectBufferAddress(env, jJjniBuffer);
 
@@ -84,7 +84,7 @@ JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecod
     return pointer;
 }
 
-JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_read(JNIEnv *env, jobject obj, jlong jHandle, jint jLen)
+JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_read(JNIEnv *env, jobject obj, jlong jHandle, jint jLen)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
@@ -96,7 +96,7 @@ JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecod
     return ov_read(vf,params->jniBuffer,jLen,&params->current_section);
 }
 
-JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_seekMs(JNIEnv *env, jobject obj, jlong jHandle, jint jMilliseconds)
+JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_seekMs(JNIEnv *env, jobject obj, jlong jHandle, jint jMilliseconds)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
@@ -107,7 +107,7 @@ JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodi
     return ov_time_seek(vf, jMilliseconds);
 }
 
-JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_seekSamples(JNIEnv *env, jobject obj, jlong jHandle, jint jSamples)
+JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_seekSamples(JNIEnv *env, jobject obj, jlong jHandle, jint jSamples)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
@@ -118,7 +118,7 @@ JNIEXPORT jint JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodi
     return ov_pcm_seek(vf, jSamples);
 }
 
-JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_tellMs(JNIEnv *env, jobject obj, jlong jHandle)
+JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_tellMs(JNIEnv *env, jobject obj, jlong jHandle)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
@@ -129,7 +129,7 @@ JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecod
     return ov_time_tell(vf);
 }
 
-JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_tellSamples(JNIEnv *env, jobject obj, jlong jHandle)
+JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_tellSamples(JNIEnv *env, jobject obj, jlong jHandle)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
@@ -140,7 +140,7 @@ JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecod
     return ov_pcm_tell(vf);
 }
 
-JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_totalSamples(JNIEnv *env, jobject obj, jlong jHandle)
+JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_totalSamples(JNIEnv *env, jobject obj, jlong jHandle)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
@@ -151,7 +151,7 @@ JNIEXPORT jlong JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecod
     return ov_pcm_total(vf,-1);
 }
 
-JNIEXPORT void JNICALL Java_xyz_gianlu_librespot_player_codecs_tremolo_OggDecodingInputStream_close(JNIEnv *env, jobject obj, jlong jHandle)
+JNIEXPORT void JNICALL Java_xyz_gianlu_librespot_player_decoders_tremolo_OggDecodingInputStream_close(JNIEnv *env, jobject obj, jlong jHandle)
 {
     struct OggVorbis_File *vf;
     vf = (struct OggVorbis_File *)jHandle;
