@@ -10,11 +10,11 @@ import xyz.gianlu.librespot.player.decoders.tremolo.SeekableInputStream;
 import xyz.gianlu.librespot.player.mixing.output.OutputAudioFormat;
 
 
-public final class TremoloVorbisCodec extends Decoder {
+public final class TremoloVorbisDecoder extends Decoder {
     private final byte[] buffer = new byte[2 * BUFFER_SIZE];
     private final OggDecodingInputStream in;
 
-    public TremoloVorbisCodec(@NotNull xyz.gianlu.librespot.player.decoders.SeekableInputStream audioFile, float normalizationFactor, int duration) throws IOException {
+    public TremoloVorbisDecoder(@NotNull xyz.gianlu.librespot.player.decoders.SeekableInputStream audioFile, float normalizationFactor, int duration) throws IOException {
         super(audioFile, normalizationFactor, duration);
         seekZero = audioIn.position();
         in = new OggDecodingInputStream(new SeekableInputStream() {
