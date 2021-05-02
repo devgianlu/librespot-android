@@ -6,6 +6,7 @@ import android.util.Log;
 
 import xyz.gianlu.librespot.audio.decoders.Decoders;
 import xyz.gianlu.librespot.audio.format.SuperAudioFormat;
+import xyz.gianlu.librespot.player.decoders.AndroidNativeDecoder;
 import xyz.gianlu.librespot.player.decoders.TremoloVorbisDecoder;
 
 public final class LibrespotApp extends Application {
@@ -15,6 +16,9 @@ public final class LibrespotApp extends Application {
         if (isArm()) {
             Decoders.replaceDecoder(SuperAudioFormat.VORBIS, TremoloVorbisDecoder.class);
             Log.i(TAG, "Using ARM optimized Vorbis decoder");
+        } else {
+            Decoders.replaceDecoder(SuperAudioFormat.VORBIS, AndroidNativeDecoder.class);
+            Log.i(TAG, "Using Android native Vorbis decoder");
         }
     }
 
