@@ -1,7 +1,11 @@
 package xyz.gianlu.librespot.player.decoders;
 
+import android.media.AudioFormat;
 import android.media.MediaCodec;
+import android.media.MediaDataSource;
+import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.os.Build;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import xyz.gianlu.librespot.player.mixing.output.OutputAudioFormat;
 
@@ -16,54 +21,123 @@ public final class AndroidNativeDecoder extends Decoder {
     private static final String TAG = AndroidNativeDecoder.class.getSimpleName();
     private final byte[] buffer = new byte[2 * BUFFER_SIZE];
     private final MediaCodec codec;
+    private final MediaExtractor extractor;
+    private final Object closeLock = new Object();
+    private long presentationTime = 0;
 
-    public AndroidNativeDecoder(@NotNull SeekableInputStream audioIn, float normalizationFactor, int duration) throws IOException {
+    public AndroidNativeDecoder(@NotNull SeekableInputStream audioIn, float normalizationFactor, int duration) throws IOException, CodecException {
         super(audioIn, normalizationFactor, duration);
 
-        codec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_VORBIS);
-        codec.configure(MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_VORBIS, 44100, 2), null, null, 0);
+        extractor = new MediaExtractor();
+        extractor.setDataSource(new MediaDataSource() {
+            @Override
+            public int readAt(long position, byte[] buffer, int offset, int size) throws IOException {
+                audioIn.seek((int) position);
+                return audioIn.read(buffer, offset, size);
+            }
+
+            @Override
+            public long getSize() {
+                return audioIn.size();
+            }
+
+            @Override
+            public void close() {
+                audioIn.close();
+            }
+        });
+
+        if (extractor.getTrackCount() == 0)
+            throw new CodecException("No tracks found.");
+
+        extractor.selectTrack(0);
+
+        MediaFormat format = extractor.getTrackFormat(0);
+
+        codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+        codec.configure(format, null, null, 0);
         codec.start();
 
-        setAudioFormat(new OutputAudioFormat(44100, 16, 2, true, false));
+        int sampleSize = 16;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            switch (format.getInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_16BIT)) {
+                case AudioFormat.ENCODING_PCM_8BIT:
+                    sampleSize = 8;
+                    break;
+                case AudioFormat.ENCODING_PCM_16BIT:
+                    sampleSize = 16;
+                    break;
+                default:
+                    throw new CodecException("Unsupported PCM encoding.");
+            }
+        }
+
+        setAudioFormat(new OutputAudioFormat(format.getInteger(MediaFormat.KEY_SAMPLE_RATE), sampleSize,
+                format.getInteger(MediaFormat.KEY_CHANNEL_COUNT), true, false));
     }
 
     @Override
-    protected int readInternal(@NotNull OutputStream out) throws IOException, CodecException {
-        if (closed) return -1;
-
-        int inputBufferId = codec.dequeueInputBuffer(-1);
-        if (inputBufferId >= 0) {
-            int count = audioIn.read(buffer);
-            if (count == -1)
-                return -1;
-
-            ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferId);
-            inputBuffer.put(buffer, 0, count);
-            codec.queueInputBuffer(inputBufferId, 0, count, -1, 0);
-        }
-
+    protected int readInternal(@NotNull OutputStream out) throws IOException {
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
-        int outputBufferId = codec.dequeueOutputBuffer(info, -1);
-        if (outputBufferId >= 0) {
-            ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferId);
-            out.write(outputBuffer.array(), info.offset, info.size);
-            codec.releaseOutputBuffer(outputBufferId, false);
-            return info.size;
-        } else {
-            Log.e(TAG, "Failed decoding: " + outputBufferId);
-            return -1;
+
+        while (true) {
+            if (closed) return -1;
+
+            synchronized (closeLock) {
+                int inputBufferId = codec.dequeueInputBuffer(-1);
+                if (inputBufferId >= 0) {
+                    ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferId);
+                    int count = extractor.readSampleData(inputBuffer, 0);
+                    if (count == -1) {
+                        codec.signalEndOfInputStream();
+                        return -1;
+                    }
+
+                    codec.queueInputBuffer(inputBufferId, inputBuffer.position(), inputBuffer.limit(), extractor.getSampleTime(), 0);
+                    extractor.advance();
+                }
+
+                int outputBufferId = codec.dequeueOutputBuffer(info, -1);
+                if (outputBufferId >= 0) {
+                    ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferId);
+
+                    while (outputBuffer.remaining() > 0) {
+                        int read = Math.min(outputBuffer.remaining(), buffer.length);
+                        outputBuffer.get(buffer, 0, read);
+                        out.write(buffer, 0, read);
+                    }
+
+                    codec.releaseOutputBuffer(outputBufferId, false);
+                    presentationTime = TimeUnit.MICROSECONDS.toMillis(info.presentationTimeUs);
+                    return info.size;
+                } else if (outputBufferId == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+                    Log.d(TAG, "Output buffers changed");
+                } else if (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                    Log.d(TAG, "Output format changed: " + codec.getOutputFormat());
+                } else {
+                    Log.e(TAG, "Failed decoding: " + outputBufferId);
+                    return -1;
+                }
+            }
         }
+    }
+
+    @Override
+    public void seek(int positionMs) {
+        extractor.seekTo(TimeUnit.MILLISECONDS.toMicros(positionMs), MediaExtractor.SEEK_TO_CLOSEST_SYNC);
     }
 
     @Override
     public void close() throws IOException {
-        codec.release();
-        super.close();
+        synchronized (closeLock) {
+            codec.release();
+            extractor.release();
+            super.close();
+        }
     }
 
     @Override
-    public int time() throws CannotGetTimeException {
-
-        return 0;
+    public int time() {
+        return (int) presentationTime;
     }
 }
