@@ -23,6 +23,6 @@ public final class Utils {
 
     @NotNull
     public static File getCredentialsFile(@NotNull Context context) {
-        return new File(context.getDataDir(), "credentials.json");
+        return new File(context.getCacheDir(), "credentials.json");
     }
 }
