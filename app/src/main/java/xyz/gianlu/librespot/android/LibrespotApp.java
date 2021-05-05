@@ -13,12 +13,11 @@ public final class LibrespotApp extends Application {
     private static final String TAG = LibrespotApp.class.getSimpleName();
 
     static {
-        if (isArm() && !BuildConfig.FORCE_NATIVE_DECODER) {
-            Decoders.replaceDecoder(SuperAudioFormat.VORBIS, TremoloVorbisDecoder.class);
+        Decoders.registerDecoder(SuperAudioFormat.VORBIS, AndroidNativeDecoder.class);
+
+        if (isArm()) {
+            Decoders.registerDecoder(SuperAudioFormat.VORBIS, 0, TremoloVorbisDecoder.class);
             Log.i(TAG, "Using ARM optimized Vorbis decoder");
-        } else {
-            Decoders.replaceDecoder(SuperAudioFormat.VORBIS, AndroidNativeDecoder.class);
-            Log.i(TAG, "Using Android native Vorbis decoder");
         }
     }
 

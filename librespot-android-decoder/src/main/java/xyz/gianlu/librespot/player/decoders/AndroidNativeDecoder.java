@@ -25,7 +25,7 @@ public final class AndroidNativeDecoder extends Decoder {
     private final Object closeLock = new Object();
     private long presentationTime = 0;
 
-    public AndroidNativeDecoder(@NotNull SeekableInputStream audioIn, float normalizationFactor, int duration) throws IOException, CodecException {
+    public AndroidNativeDecoder(@NotNull SeekableInputStream audioIn, float normalizationFactor, int duration) throws IOException, DecoderException {
         super(audioIn, normalizationFactor, duration);
 
         extractor = new MediaExtractor();
@@ -48,7 +48,7 @@ public final class AndroidNativeDecoder extends Decoder {
         });
 
         if (extractor.getTrackCount() == 0)
-            throw new CodecException("No tracks found.");
+            throw new DecoderException("No tracks found.");
 
         extractor.selectTrack(0);
 
@@ -68,7 +68,7 @@ public final class AndroidNativeDecoder extends Decoder {
                     sampleSize = 16;
                     break;
                 default:
-                    throw new CodecException("Unsupported PCM encoding.");
+                    throw new DecoderException("Unsupported PCM encoding.");
             }
         }
 
