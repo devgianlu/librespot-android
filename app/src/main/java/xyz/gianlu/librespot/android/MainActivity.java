@@ -1,6 +1,7 @@
 package xyz.gianlu.librespot.android;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -180,11 +181,22 @@ public final class MainActivity extends AppCompatActivity {
                 LibrespotHolder.set(player);
             }
 
-            try {
-                player.waitReady();
-            } catch (InterruptedException ex) {
-                LibrespotHolder.clear();
-                return;
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+                while (!player.isReady()) {
+                    try {
+                        //noinspection BusyWait
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        return;
+                    }
+                }
+            } else {
+                try {
+                    player.waitReady();
+                } catch (InterruptedException ex) {
+                    LibrespotHolder.clear();
+                    return;
+                }
             }
 
             handler.post(() -> callback.playerReady(session.username()));
