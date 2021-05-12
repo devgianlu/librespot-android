@@ -45,7 +45,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0'
 
-    implementation('xyz.gianlu.librespot:librespot-player:1.5.6-SNAPSHOT:thin') {
+    implementation('xyz.gianlu.librespot:librespot-player:1.6.1-SNAPSHOT:thin') {
         exclude group: 'xyz.gianlu.librespot', module: 'librespot-sink'
         exclude group: 'com.lmax', module: 'disruptor'
         exclude group: 'org.apache.logging.log4j'
