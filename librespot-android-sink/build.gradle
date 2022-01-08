@@ -29,7 +29,7 @@ android {
 }
 
 dependencies {
-    implementation 'xyz.gianlu.librespot:librespot-sink-api:1.6.1-SNAPSHOT'
+    implementation 'xyz.gianlu.librespot:librespot-sink-api:1.6.3-SNAPSHOT'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
