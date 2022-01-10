@@ -96,7 +96,7 @@ public final class AndroidSinkOutput implements SinkOutput {
 
     @Override
     public void stop() {
-        if (track != null) track.stop();
+        if (track != null && track.getPlayState() != AudioTrack.PLAYSTATE_STOPPED) track.stop();
     }
 
     @Override
