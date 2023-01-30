@@ -13,8 +13,8 @@ public final class LibrespotApp extends Application {
     private static final String TAG = LibrespotApp.class.getSimpleName();
 
     static {
-        Decoders.registerDecoder(SuperAudioFormat.VORBIS, AndroidNativeDecoder.class);
-        Decoders.registerDecoder(SuperAudioFormat.MP3, AndroidNativeDecoder.class);
+        Decoders.registerDecoder(SuperAudioFormat.VORBIS, 0, AndroidNativeDecoder.class);
+        Decoders.registerDecoder(SuperAudioFormat.MP3, 0, AndroidNativeDecoder.class);
 
         if (isArm()) {
             Decoders.registerDecoder(SuperAudioFormat.VORBIS, 0, TremoloVorbisDecoder.class);
