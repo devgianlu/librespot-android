@@ -28,17 +28,18 @@ public final class AndroidNativeDecoder extends Decoder {
     public AndroidNativeDecoder(@NotNull SeekableInputStream audioIn, float normalizationFactor, int duration) throws IOException, DecoderException {
         super(audioIn, normalizationFactor, duration);
 
+        int start = audioIn.position();
         extractor = new MediaExtractor();
         extractor.setDataSource(new MediaDataSource() {
             @Override
             public int readAt(long position, byte[] buffer, int offset, int size) throws IOException {
-                audioIn.seek((int) position);
+                audioIn.seek((int) position + start);
                 return audioIn.read(buffer, offset, size);
             }
 
             @Override
             public long getSize() {
-                return audioIn.size();
+                return audioIn.size() - start;
             }
 
             @Override
