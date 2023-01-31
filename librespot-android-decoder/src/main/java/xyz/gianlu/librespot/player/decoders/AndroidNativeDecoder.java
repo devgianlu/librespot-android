@@ -28,17 +28,18 @@ public final class AndroidNativeDecoder extends Decoder {
     public AndroidNativeDecoder(@NotNull SeekableInputStream audioIn, float normalizationFactor, int duration) throws IOException, DecoderException {
         super(audioIn, normalizationFactor, duration);
 
+        int start = audioIn.position();
         extractor = new MediaExtractor();
         extractor.setDataSource(new MediaDataSource() {
             @Override
             public int readAt(long position, byte[] buffer, int offset, int size) throws IOException {
-                audioIn.seek((int) position);
+                audioIn.seek((int) position + start);
                 return audioIn.read(buffer, offset, size);
             }
 
             @Override
             public long getSize() {
-                return audioIn.size();
+                return audioIn.size() - start;
             }
 
             @Override
@@ -92,12 +93,11 @@ public final class AndroidNativeDecoder extends Decoder {
                         codec.signalEndOfInputStream();
                         return -1;
                     }
-
                     codec.queueInputBuffer(inputBufferId, inputBuffer.position(), inputBuffer.limit(), extractor.getSampleTime(), 0);
                     extractor.advance();
                 }
 
-                int outputBufferId = codec.dequeueOutputBuffer(info, -1);
+                int outputBufferId = codec.dequeueOutputBuffer(info, 10000);
                 if (outputBufferId >= 0) {
                     ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferId);
 
@@ -110,6 +110,8 @@ public final class AndroidNativeDecoder extends Decoder {
                     codec.releaseOutputBuffer(outputBufferId, false);
                     presentationTime = TimeUnit.MICROSECONDS.toMillis(info.presentationTimeUs);
                     return info.size;
+                } else if (outputBufferId == MediaCodec.INFO_TRY_AGAIN_LATER) {
+                    Log.d(TAG, "Timeout");
                 } else if (outputBufferId == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     Log.d(TAG, "Output buffers changed");
                 } else if (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
